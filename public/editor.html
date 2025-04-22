@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Enhancer - Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        /* Fix scrolling issues */
+        html, body {
+            height: auto !important;
+            min-height: 100%;
+            overflow-y: auto !important;
+            position: relative;
+        }
+        
+        .editor-container {
+            height: auto !important;
+            min-height: 100%;
+            overflow-y: visible !important;
+            position: relative;
+        }
+        
+        .editor-content {
+            height: auto !important;
+            overflow-y: visible !important;
+            padding-bottom: 50px;
+            position: relative;
+        }
+        
+        .editor-sections {
+            height: auto !important;
+            overflow-y: visible !important;
+            padding-bottom: 100px;
+            position: relative;
+        }
+        
+        .section-container {
+            height: auto !important;
+            overflow: visible !important;
+            scroll-margin-top: 150px; /* Increased margin for better positioning */
+            padding-top: 10px; /* Add some padding at the top of each section */
+            padding-bottom: 20px; /* Add some padding at the bottom of each section */
+            position: relative;
+            border-bottom: 1px solid #f0f0f0; /* Subtle visual separator between sections */
+        }
+        
+        /* Add a highlight effect when a section becomes active */
+        .section-container.active {
+            animation: highlight-section 1s ease-out;
+        }
+        
+        /* Additional highlight style used by the JS navigation */
+        .section-highlight {
+            background-color: rgba(255, 255, 150, 0.4);
+            transition: background-color 1.5s ease-out;
+        }
+        
+        @keyframes highlight-section {
+            0% { background-color: rgba(255, 255, 200, 0.5); }
+            100% { background-color: transparent; }
+        }
+        
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .preview-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            height: 100vh;
+            background-color: #fff;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: right 0.3s ease-in-out;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .preview-panel.active,
+        .preview-panel[style*="display: flex"] {
+            right: 0;
+            display: flex !important;
+        }
+        
+        /* Force scrollbar to always appear to prevent layout shifts */
+        html {
+            overflow-y: scroll;
+        }
+        
+        /* Reset fixed height on mobile */
+        @media (max-width: 768px) {
+            .editor-content {
+                height: auto !important;
+                min-height: auto !important;
+            }
+        }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Debug output */
+        #debugOutput {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            z-index: 9999;
+            max-height: 200px;
+            overflow: auto;
+            max-width: 300px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="editor-page">
+    <script>
+        // Initialize global CVEnhancer object
+        window.CVEnhancer = window.CVEnhancer || {
+            state: {
+                paperSize: 'a4',
+                currentTemplate: 'professional'
+            }
+        };
+        
+        // Debug flag to monitor code execution
+        window.debugEnabled = true;
+    </script>
+
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>CV<span>Enhancer</span></h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="#" class="active">Editor</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="editor-container">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h2>CV Sections</h2>
+                </div>
+                <div class="sidebar-content">
+                    <ul class="section-tabs">
+                        <li class="active" data-section="personal-info">
+                            <i class="fas fa-user"></i> Personal Information
+                        </li>
+                        <li data-section="summary">
+                            <i class="fas fa-file-alt"></i> Professional Summary
+                        </li>
+                        <li data-section="experience">
+                            <i class="fas fa-briefcase"></i> Work Experience
+                        </li>
+                        <li data-section="education">
+                            <i class="fas fa-graduation-cap"></i> Education
+                        </li>
+                        <li data-section="skills">
+                            <i class="fas fa-cogs"></i> Skills
+                        </li>
+                        <li data-section="certifications">
+                            <i class="fas fa-certificate"></i> Certifications
+                        </li>
+                        <li data-section="languages">
+                            <i class="fas fa-language"></i> Languages
+                        </li>
+                        <li data-section="additional">
+                            <i class="fas fa-plus-circle"></i> Additional Information
+                        </li>
+                    </ul>
+                </div>
+                <div class="sidebar-footer">
+                    <div class="template-selector">
+                        <h3>Select Template</h3>
+                        <div class="template-options">
+                            <div class="template-option active" data-template="professional">
+                                <img src="/images/template1-thumb.jpg" alt="Professional Template">
+                                <span>Professional</span>
+                            </div>
+                            <div class="template-option" data-template="modern">
+                                <img src="/images/template2-thumb.jpg" alt="Modern Template">
+                                <span>Modern</span>
+                            </div>
+                            <div class="template-option" data-template="executive">
+                                <img src="/images/template3-thumb.jpg" alt="Executive Template">
+                                <span>Executive</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-content">
+                <div class="editor-toolbar">
+                    <div class="toolbar-left">
+                        <button id="undoButton" class="btn btn-tool" title="Undo">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <button id="redoButton" class="btn btn-tool" title="Redo">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <div class="separator"></div>
+                        <button id="aiEnhanceButton" class="btn btn-tool" title="AI Enhance">
+                            <i class="fas fa-magic"></i> AI Enhance
+                        </button>
+                    </div>
+                    <div class="toolbar-right">
+                        <button id="previewButton" class="btn btn-secondary">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                        <button id="downloadButton" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Download PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div class="editor-sections">
+                    <!-- Personal Information Section -->
+                    <div class="section-container active" id="personal-info">
+                        <h2>Personal Information</h2>
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" class="form-control">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input type="tel" id="phone" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="location">Location</label>
+                                <input type="text" id="location" class="form-control" placeholder="City, Country">
+                            </div>
+                            <div class="form-group">
+                                <label for="linkedin">LinkedIn</label>
+                                <input type="url" id="linkedin" class="form-control" placeholder="LinkedIn URL">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="portfolio">Portfolio/Website</label>
+                            <input type="url" id="portfolio" class="form-control" placeholder="Your website URL (optional)">
+                        </div>
+                    </div>
+
+                    <!-- Professional Summary Section -->
+                    <div class="section-container" id="summary">
+                        <h2>Professional Summary</h2>
+                        <div class="form-group">
+                            <div class="editor-actions">
+                                <span class="original-label">Original</span>
+                                <div class="toggle-container">
+                                    <button class="btn btn-tab active" data-target="original-summary">Original</button>
+                                    <button class="btn btn-tab" data-target="enhanced-summary">AI Enhanced</button>
+                                </div>
+                            </div>
+                            <div class="content-container active" id="original-summary">
+                                <textarea id="professionalSummary" class="form-control" rows="6" placeholder="Enter a summary of your professional experience and goals..."></textarea>
+                            </div>
+                            <div class="content-container" id="enhanced-summary">
+                                <div class="ai-suggestion">
+                                    <div class="suggestion-header">
+                                        <span class="ai-badge"><i class="fas fa-robot"></i> AI Enhanced</span>
+                                        <div class="suggestion-actions">
+                                            <button class="btn btn-small btn-accept"><i class="fas fa-check"></i> Accept</button>
+                                            <button class="btn btn-small btn-edit"><i class="fas fa-pen"></i> Edit</button>
+                                        </div>
+                                    </div>
+                                    <div class="suggestion-content" id="enhancedSummaryContent">
+                                        <!-- This will be filled by AI -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Work Experience Section -->
+                    <div class="section-container" id="experience">
+                        <h2>Work Experience</h2>
+                        <div class="section-header">
+                            <button class="btn btn-add" id="addExperience" onclick="addExperienceItem()">
+                                <i class="fas fa-plus"></i> Add Experience
+                            </button>
+                        </div>
+                        
+                        <div class="experience-items" id="experienceItems">
+                            <!-- Experience item template - will be duplicated by JS -->
+                            <div class="experience-item">
+                                <div class="item-header">
+                                    <h3>Experience #1</h3>
+                                    <div class="item-actions">
+                                        <button class="btn btn-small btn-move"><i class="fas fa-arrows-alt"></i></button>
+                                        <button class="btn btn-small btn-remove" onclick="this.closest('.experience-item').remove(); debugLog('First experience removed');"><i class="fas fa-trash-alt"></i></button>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Job Title</label>
+                                        <input type="text" class="form-control job-title">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Company</label>
+                                        <input type="text" class="form-control company-name">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Start Date</label>
+                                        <input type="month" class="form-control start-date">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>End Date</label>
+                                        <input type="month" class="form-control end-date">
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="currentJob1" class="current-job" onchange="handleCurrentJob(this)">
+                                            <label for="currentJob1">I currently work here</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Description</label>
+                                    <div class="editor-actions">
+                                        <div class="toggle-container">
+                                            <button class="btn btn-tab active" data-target="original-exp-1">Original</button>
+                                            <button class="btn btn-tab" data-target="enhanced-exp-1">AI Enhanced</button>
+                                        </div>
+                                    </div>
+                                    <div class="content-container active" id="original-exp-1">
+                                        <textarea class="form-control job-description" rows="4" placeholder="Describe your responsibilities and achievements..."></textarea>
+                                    </div>
+                                    <div class="content-container" id="enhanced-exp-1">
+                                        <div class="ai-suggestion">
+                                            <div class="suggestion-header">
+                                                <span class="ai-badge"><i class="fas fa-robot"></i> AI Enhanced</span>
+                                                <div class="suggestion-actions">
+                                                    <button class="btn btn-small btn-accept"><i class="fas fa-check"></i> Accept</button>
+                                                    <button class="btn btn-small btn-edit"><i class="fas fa-pen"></i> Edit</button>
+                                                </div>
+                                            </div>
+                                            <div class="suggestion-content enhanced-description">
+                                                <!-- This will be filled by AI -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Education Section -->
+                    <div class="section-container" id="education">
+                        <h2>Education</h2>
+                        <div class="section-header">
+                            <button class="btn btn-add" id="addEducation" onclick="addEducationItem()">
+                                <i class="fas fa-plus"></i> Add Education
+                            </button>
+                        </div>
+                        
+                        <div class="education-items" id="educationItems">
+                            <!-- Education item template - will be duplicated by JS -->
+                            <div class="education-item">
+                                <div class="item-header">
+                                    <h3>Education #1</h3>
+                                    <div class="item-actions">
+                                        <button class="btn btn-small btn-move"><i class="fas fa-arrows-alt"></i></button>
+                                        <button class="btn btn-small btn-remove" onclick="this.closest('.education-item').remove(); debugLog('First education removed');"><i class="fas fa-trash-alt"></i></button>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Degree</label>
+                                        <input type="text" class="form-control degree">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Institution</label>
+                                        <input type="text" class="form-control institution">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Start Date</label>
+                                        <input type="month" class="form-control edu-start-date">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>End Date</label>
+                                        <input type="month" class="form-control edu-end-date">
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="currentEdu1" class="current-edu" onchange="handleCurrentEducation(this)">
+                                            <label for="currentEdu1">I'm currently studying here</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Description (Optional)</label>
+                                    <textarea class="form-control edu-description" rows="2" placeholder="Relevant coursework, achievements, etc."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Skills Section -->
+                    <div class="section-container" id="skills">
+                        <h2>Skills</h2>
+                        <div class="skills-container">
+                            <div class="skills-column">
+                                <h3>Current Skills</h3>
+                                <div class="skills-input-container">
+                                    <div class="skill-tags" id="skillTags">
+                                        <!-- Skills will be added here dynamically -->
+                                    </div>
+                                    <div class="add-skill-input">
+                                        <input type="text" id="skillInput" placeholder="Add a skill...">
+                                        <button id="addSkillBtn" class="btn btn-small"><i class="fas fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="skills-column">
+                                <h3>AI Suggested Skills</h3>
+                                <div class="suggested-skills" id="suggestedSkills">
+                                    <!-- AI suggested skills will be added here -->
+                                    <div class="skill-suggestion">
+                                        <span>Project Management</span>
+                                        <button class="btn btn-small btn-add-suggestion"><i class="fas fa-plus"></i></button>
+                                    </div>
+                                </div>
+                                <button id="generateSkillsBtn" class="btn btn-secondary">
+                                    <i class="fas fa-magic"></i> Generate Suggestions
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certifications Section -->
+                    <div class="section-container" id="certifications">
+                        <h2>Certifications</h2>
+                        <div class="section-header">
+                            <button class="btn btn-add" id="addCertification" onclick="addCertificationItem()">
+                                <i class="fas fa-plus"></i> Add Certification
+                            </button>
+                        </div>
+                        
+                        <div class="certification-items" id="certificationItems">
+                            <!-- Certification item template - will be duplicated by JS -->
+                            <div class="certification-item">
+                                <div class="item-header">
+                                    <h3>Certification #1</h3>
+                                    <div class="item-actions">
+                                        <button class="btn btn-small btn-move"><i class="fas fa-arrows-alt"></i></button>
+                                        <button class="btn btn-small btn-remove" onclick="this.closest('.certification-item').remove(); debugLog('First certification removed');"><i class="fas fa-trash-alt"></i></button>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Certification Name</label>
+                                        <input type="text" class="form-control cert-name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Issuing Organization</label>
+                                        <input type="text" class="form-control cert-org">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Issue Date</label>
+                                        <input type="month" class="form-control cert-date">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Expiration Date (Optional)</label>
+                                        <input type="month" class="form-control cert-expiry">
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="noCertExpiry1" class="no-expiry" onchange="handleNoExpiry(this)">
+                                            <label for="noCertExpiry1">No expiration date</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Languages Section -->
+                    <div class="section-container" id="languages">
+                        <h2>Languages</h2>
+                        <div class="section-header">
+                            <button class="btn btn-add" id="addLanguage" onclick="addLanguageItem()">
+                                <i class="fas fa-plus"></i> Add Language
+                            </button>
+                        </div>
+                        
+                        <div class="language-items" id="languageItems">
+                            <!-- Language item template - will be duplicated by JS -->
+                            <div class="language-item">
+                                <div class="item-header">
+                                    <h3>Language #1</h3>
+                                    <div class="item-actions">
+                                        <button class="btn btn-small btn-move"><i class="fas fa-arrows-alt"></i></button>
+                                        <button class="btn btn-small btn-remove" onclick="this.closest('.language-item').remove(); debugLog('First language removed');"><i class="fas fa-trash-alt"></i></button>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Language</label>
+                                        <input type="text" class="form-control language-name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Proficiency Level</label>
+                                        <select class="form-control proficiency-level">
+                                            <option value="Native">Native</option>
+                                            <option value="Fluent">Fluent</option>
+                                            <option value="Advanced">Advanced</option>
+                                            <option value="Intermediate">Intermediate</option>
+                                            <option value="Basic">Basic</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information Section -->
+                    <div class="section-container" id="additional">
+                        <h2>Additional Information</h2>
+                        <div class="form-group">
+                            <label for="additionalInfo">Additional Information (Optional)</label>
+                            <textarea id="additionalInfo" class="form-control" rows="4" placeholder="Include any other relevant information like hobbies, volunteer work, publications, etc."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="previewPanel" class="preview-panel">
+                <div class="preview-header">
+                    <div class="preview-controls">
+                        <label for="paperSize">Paper Size:</label>
+                        <select id="paperSize">
+                            <option value="a4">A4</option>
+                            <option value="letter">Letter</option>
+                            <option value="legal">Legal</option>
+                        </select>
+                    </div>
+                    <div class="preview-actions">
+                        <button id="downloadFromPreview" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Download CV
+                        </button>
+                        <button id="closePreview" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+                <div class="preview-content">
+                    <iframe id="previewFrame" class="preview-frame"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <h3 id="loadingMessage">Processing...</h3>
+                <p>Please wait while we enhance your CV</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <script>
+        // Immediately remove any existing error display
+        (function() {
+            console.log("Removing any existing error displays");
+            const existingErrorOutput = document.getElementById('errorOutput');
+            if (existingErrorOutput) {
+                existingErrorOutput.remove();
+            }
+        })();
+
+        // Function to navigate to a specific section by ID
+        function navigateToSection(sectionId) {
+            debugLog(`Direct navigation to section: ${sectionId}`);
+            
+            const section = document.getElementById(sectionId);
+            if (!section) {
+                debugLog(`Error: Section "${sectionId}" not found`);
+                return;
+            }
+            
+            // Find and activate the correct tab
+            const tab = document.querySelector(`.section-tabs li[data-section="${sectionId}"]`);
+            if (tab) {
+                // Remove active class from all tabs and sections
+                document.querySelectorAll('.section-tabs li').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.section-container').forEach(s => s.classList.remove('active'));
+                
+                // Add active class to the tab and section
+                tab.classList.add('active');
+                section.classList.add('active');
+            }
+            
+            // Precise scroll calculation
+            const headerHeight = document.querySelector('header').offsetHeight;
+            const toolbarHeight = document.querySelector('.editor-toolbar')?.offsetHeight || 0;
+            const totalOffset = headerHeight + toolbarHeight + 20;
+            
+            // Get the absolute position of the section
+            const sectionRect = section.getBoundingClientRect();
+            const sectionPosition = sectionRect.top + window.pageYOffset;
+            
+            debugLog(`Scrolling to section "${sectionId}" at position ${sectionPosition}px with offset ${totalOffset}px`);
+            
+            // Scroll directly to the position with offset
+            window.scrollTo({
+                top: sectionPosition - totalOffset,
+                behavior: 'smooth'
+            });
+            
+            // Add a highlight class temporarily
+            section.classList.add('section-highlight');
+            setTimeout(() => {
+                section.classList.remove('section-highlight');
+            }, 1500);
+        }
+
+        // Global error handler to catch and display JS errors
+        window.onerror = function(message, source, lineno, colno, error) {
+            // Don't display generic "Script error" messages that often come from third-party scripts
+            if (message === "Script error." || message === "Script error") {
+                console.log("Ignored generic script error from third-party script");
+                return true;
+            }
+            
+            const errorMsg = `ERROR: ${message} at ${source}:${lineno}:${colno}`;
+            console.error(errorMsg, error);
+            
+            // Only create error display for specific errors with actual information
+            if (source && lineno) {
+                // Create an error display if it doesn't exist
+                if (!document.getElementById('errorOutput')) {
+                    const errorEl = document.createElement('div');
+                    errorEl.id = 'errorOutput';
+                    errorEl.style.position = 'fixed';
+                    errorEl.style.top = '0';
+                    errorEl.style.left = '0';
+                    errorEl.style.backgroundColor = 'rgba(255,0,0,0.8)';
+                    errorEl.style.color = 'white';
+                    errorEl.style.padding = '10px';
+                    errorEl.style.zIndex = '10000';
+                    errorEl.style.maxHeight = '200px';
+                    errorEl.style.overflow = 'auto';
+                    errorEl.style.maxWidth = '100%';
+                    errorEl.style.fontFamily = 'monospace';
+                    errorEl.style.fontSize = '12px';
+                    document.body.appendChild(errorEl);
+                }
+                
+                // Add error message
+                const errorEl = document.getElementById('errorOutput');
+                errorEl.innerHTML += errorMsg + '<br>';
+            }
+            
+            return true; // Prevent default error handling
+        };
+
+        // Debug function to check if JavaScript is running
+        function debugLog(message) {
+            console.log('DEBUG: ' + message);
+            // Create a debug element if it doesn't exist
+            if (!document.getElementById('debugOutput')) {
+                const debugEl = document.createElement('div');
+                debugEl.id = 'debugOutput';
+                debugEl.style.position = 'fixed';
+                debugEl.style.bottom = '0';
+                debugEl.style.right = '0';
+                debugEl.style.backgroundColor = 'rgba(0,0,0,0.7)';
+                debugEl.style.color = 'white';
+                debugEl.style.padding = '10px';
+                debugEl.style.zIndex = '9999';
+                debugEl.style.maxHeight = '200px';
+                debugEl.style.overflow = 'auto';
+                debugEl.style.maxWidth = '300px';
+                debugEl.style.fontFamily = 'monospace';
+                debugEl.style.fontSize = '12px';
+                document.body.appendChild(debugEl);
+            }
+            // Add message to debug element
+            const debugEl = document.getElementById('debugOutput');
+            debugEl.innerHTML += message + '<br>';
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            debugLog('Page loaded, initializing direct handlers');
+            
+            // Initialize section tabs
+            const sectionTabs = document.querySelectorAll('.section-tabs li');
+            sectionTabs.forEach(function(tab) {
+                tab.addEventListener('click', function() {
+                    debugLog('Section tab clicked: ' + tab.dataset.section);
+                    
+                    // Get the section ID from the tab's data attribute
+                    const sectionId = tab.dataset.section;
+                    
+                    // Use the navigation function for more accurate positioning
+                    navigateToSection(sectionId);
+                });
+            });
+            
+            // Preview button handler
+            document.getElementById('previewButton').addEventListener('click', function() {
+                console.log('Preview button clicked');
+                showPreview();
+            });
+            
+            // Download button
+            const downloadButton = document.getElementById('downloadButton');
+            if (downloadButton) {
+                downloadButton.addEventListener('click', function() {
+                    debugLog('Download button clicked');
+                    const loadingOverlay = document.getElementById('loadingOverlay');
+                    if (loadingOverlay) {
+                        loadingOverlay.style.display = 'flex';
+                        setTimeout(function() {
+                            loadingOverlay.style.display = 'none';
+                            alert('PDF download simulation complete!');
+                        }, 2000);
+                    }
+                });
+            }
+            
+            // AI Enhance button
+            const aiEnhanceButton = document.getElementById('aiEnhanceButton');
+            if (aiEnhanceButton) {
+                aiEnhanceButton.addEventListener('click', function() {
+                    debugLog('AI Enhance button clicked');
+                    const loadingOverlay = document.getElementById('loadingOverlay');
+                    if (loadingOverlay) {
+                        loadingOverlay.style.display = 'flex';
+                        document.getElementById('loadingMessage').textContent = 'Enhancing with AI...';
+                        setTimeout(function() {
+                            loadingOverlay.style.display = 'none';
+                            document.getElementById('loadingMessage').textContent = 'Processing...';
+                            // Simulate AI enhancement
+                            const enhancedSummaryContent = document.getElementById('enhancedSummaryContent');
+                            if (enhancedSummaryContent) {
+                                enhancedSummaryContent.textContent = 'Experienced professional with a proven track record of success in ' +
+                                    'delivering high-quality solutions. Adept at problem-solving and collaborating with cross-functional teams.';
+                            }
+                        }, 2000);
+                    }
+                });
+            }
+
+            // Add remove button handlers for existing items
+            document.querySelectorAll('.btn-remove').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    debugLog('Remove button clicked');
+                    const item = this.closest('.experience-item, .education-item, .certification-item, .language-item');
+                    if (item) {
+                        item.remove();
+                    }
+                });
+            });
+            
+            // Add checkbox handlers for existing items
+            document.querySelectorAll('.current-job').forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    handleCurrentJob(this);
+                });
+            });
+            
+            document.querySelectorAll('.current-edu').forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    handleCurrentEducation(this);
+                });
+            });
+            
+            document.querySelectorAll('.no-expiry').forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    handleNoExpiry(this);
+                });
+            });
+            
+            // Add event handlers for template selection
+            const templateOptions = document.querySelectorAll('.template-option');
+            templateOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all options
+                    templateOptions.forEach(opt => opt.classList.remove('active'));
+                    // Add active class to the clicked option
+                    this.classList.add('active');
+                    console.log('Template selected:', this.getAttribute('data-template'));
+                });
+            });
+            
+            // Set the first template as active by default
+            if (templateOptions.length > 0 && !document.querySelector('.template-option.active')) {
+                templateOptions[0].classList.add('active');
+            }
+            
+            debugLog('Direct handlers initialized');
+        });
+
+        // Direct global functions for buttons
+        function addExperienceItem() {
+            debugLog('Add Experience clicked (global function)');
+            const experienceItems = document.getElementById('experienceItems');
+            if (!experienceItems) {
+                console.error('Experience items container not found');
+                return;
+            }
+            
+            const expCount = experienceItems.getElementsByClassName('experience-item').length + 1;
+            
+            const newItem = document.createElement('div');
+            newItem.className = 'experience-item';
+            newItem.innerHTML = `
+                <div class="item-header">
+                    <h3>Experience #${expCount}</h3>
+                    <div class="item-actions">
+                        <button class="btn btn-small btn-move"><i class="fas fa-arrows-alt"></i></button>
+                        <button class="btn btn-small btn-remove" onclick="this.closest('.experience-item').remove()"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Job Title</label>
+                        <input type="text" class="form-control job-title">
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" class="form-control company-name">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="month" class="form-control start-date">
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="month" class="form-control end-date">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="currentJob${expCount}" class="current-job" onchange="handleCurrentJob(this)">
+                            <label for="currentJob${expCount}">I currently work here</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control job-description" rows="4" placeholder="Describe your responsibilities and achievements..."></textarea>
+                </div>
+            `;
+            
+            experienceItems.appendChild(newItem);
+        }
+        
+        function addEducationItem() {
+            debugLog('Add Education clicked (global function)');
+            const educationItems = document.getElementById('educationItems');
+            if (!educationItems) {
+                console.error('Education items container not found');
+                return;
+            }
+            
+            const eduCount = educationItems.getElementsByClassName('education-item').length + 1;
+            
+            const newItem = document.createElement('div');
+            newItem.className = 'education-item';
+            newItem.innerHTML = `
+                <div class="item-header">
+                    <h3>Education #${eduCount}</h3>
+                    <div class="item-actions">
+                        <button class="btn btn-small btn-move"><i class="fas fa-arrows-alt"></i></button>
+                        <button class="btn btn-small btn-remove" onclick="this.closest('.education-item').remove(); debugLog('First education removed');"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Degree</label>
+                        <input type="text" class="form-control degree">
+                    </div>
+                    <div class="form-group">
+                        <label>Institution</label>
+                        <input type="text" class="form-control institution">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="month" class="form-control edu-start-date">
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="month" class="form-control edu-end-date">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="currentEdu${eduCount}" class="current-edu" onchange="handleCurrentEducation(this)">
+                            <label for="currentEdu${eduCount}">I'm currently studying here</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description (Optional)</label>
+                    <textarea class="form-control edu-description" rows="2" placeholder="Relevant coursework, achievements, etc."></textarea>
+                </div>
+            `;
+            
+            educationItems.appendChild(newItem);
+            debugLog('Education item added');
+        }
+        
+        function addCertificationItem() {
+            debugLog('Add Certification clicked (global function)');
+            const certificationItems = document.getElementById('certificationItems');
+            if (!certificationItems) {
+                console.error('Certification items container not found');
+                return;
+            }
+            
+            const certCount = certificationItems.getElementsByClassName('certification-item').length + 1;
+            
+            const newItem = document.createElement('div');
+            newItem.className = 'certification-item';
+            newItem.innerHTML = `
+                <div class="item-header">
+                    <h3>Certification #${certCount}</h3>
+                    <div class="item-actions">
+                        <button class="btn btn-small btn-move"><i class="fas fa-arrows-alt"></i></button>
+                        <button class="btn btn-small btn-remove" onclick="this.closest('.certification-item').remove(); debugLog('First certification removed');"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Certification Name</label>
+                        <input type="text" class="form-control cert-name">
+                    </div>
+                    <div class="form-group">
+                        <label>Issuing Organization</label>
+                        <input type="text" class="form-control cert-org">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Issue Date</label>
+                        <input type="month" class="form-control cert-date">
+                    </div>
+                    <div class="form-group">
+                        <label>Expiration Date (Optional)</label>
+                        <input type="month" class="form-control cert-expiry">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="noCertExpiry${certCount}" class="no-expiry" onchange="handleNoExpiry(this)">
+                            <label for="noCertExpiry${certCount}">No expiration date</label>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            certificationItems.appendChild(newItem);
+            debugLog('Certification item added');
+        }
+        
+        function addLanguageItem() {
+            debugLog('Add Language clicked (global function)');
+            const languageItems = document.getElementById('languageItems');
+            if (!languageItems) {
+                console.error('Language items container not found');
+                return;
+            }
+            
+            const langCount = languageItems.getElementsByClassName('language-item').length + 1;
+            
+            const newItem = document.createElement('div');
+            newItem.className = 'language-item';
+            newItem.innerHTML = `
+                <div class="item-header">
+                    <h3>Language #${langCount}</h3>
+                    <div class="item-actions">
+                        <button class="btn btn-small btn-move"><i class="fas fa-arrows-alt"></i></button>
+                        <button class="btn btn-small btn-remove" onclick="this.closest('.language-item').remove(); debugLog('First language removed');"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Language</label>
+                        <input type="text" class="form-control language-name">
+                    </div>
+                    <div class="form-group">
+                        <label>Proficiency Level</label>
+                        <select class="form-control proficiency-level">
+                            <option value="Native">Native</option>
+                            <option value="Fluent">Fluent</option>
+                            <option value="Advanced">Advanced</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Basic">Basic</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            
+            languageItems.appendChild(newItem);
+            debugLog('Language item added');
+        }
+        
+        // Event handler functions
+        function handleCurrentJob(checkbox) {
+            debugLog('Current job checkbox changed');
+            const endDateInput = checkbox.closest('.form-group').querySelector('.end-date');
+            if (endDateInput) {
+                endDateInput.disabled = checkbox.checked;
+                if (checkbox.checked) endDateInput.value = '';
+            }
+        }
+        
+        function handleCurrentEducation(checkbox) {
+            debugLog('Current education checkbox changed');
+            const endDateInput = checkbox.closest('.form-group').querySelector('.edu-end-date');
+            if (endDateInput) {
+                endDateInput.disabled = checkbox.checked;
+                if (checkbox.checked) endDateInput.value = '';
+            }
+        }
+        
+        function handleNoExpiry(checkbox) {
+            debugLog('No expiry checkbox changed');
+            const expiryInput = checkbox.closest('.form-group').querySelector('.cert-expiry');
+            if (expiryInput) {
+                expiryInput.disabled = checkbox.checked;
+                if (checkbox.checked) expiryInput.value = '';
+            }
+        }
+    </script>
+    <script src="/js/main.js"></script>
+    <script src="/js/pdfParser.js"></script>
+    <script src="/js/aiEnhancer.js"></script>
+    <script src="/js/pdfGenerator.js"></script>
+    <script src="/js/sections.js"></script>
+    <script src="/js/editor.js"></script>
+    <script>
+        // Make sure the initEditorPage function is called when the page loads
+        window.addEventListener('load', function() {
+            console.log('Window loaded, initializing editor page...');
+            if (typeof initEditorPage === 'function') {
+                initEditorPage();
+                console.log('initEditorPage function called');
+            } else {
+                console.error('initEditorPage function not found!');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+/**
+ * CV Enhancer - OpenAI Integration
+ * Handles integration with OpenAI API for CV enhancement
+ */
+
+const { OpenAI } = require('openai');
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY || 'your-api-key-here'
+});
+
+/**
+ * Enhance CV data using OpenAI
+ * @param {Object} cvData - The CV data to enhance
+ * @returns {Promise<Object>} - Enhanced CV data
+ */
+async function enhanceWithOpenAI(cvData) {
+    try {
+        console.log('Enhancing CV with OpenAI...');
+        
+        // Clone the original data
+        const enhancedData = { ...cvData };
+        
+        // Enhance professional summary if it exists
+        if (cvData.summary) {
+            const enhancedSummary = await enhanceText(cvData.summary, 'professional summary');
+            enhancedData.summary = enhancedSummary;
+        }
+        
+        // Enhance experience descriptions
+        if (cvData.experience && cvData.experience.length > 0) {
+            enhancedData.experience = await Promise.all(
+                cvData.experience.map(async (exp) => {
+                    const enhancedDescription = await enhanceText(
+                        exp.description, 
+                        'job description',
+                        `Job title: ${exp.title}, Company: ${exp.company}`
+                    );
+                    return { ...exp, description: enhancedDescription };
+                })
+            );
+        }
+        
+        // Suggest additional skills based on experience
+        if (cvData.experience && cvData.experience.length > 0) {
+            const jobDescriptions = cvData.experience.map(exp => exp.description);
+            const additionalSkills = await suggestSkills(jobDescriptions, cvData.skills || []);
+            enhancedData.suggestedSkills = additionalSkills;
+        }
+        
+        return enhancedData;
+    } catch (error) {
+        console.error('Error enhancing CV with OpenAI:', error);
+        throw error;
+    }
+}
+
+/**
+ * Enhance text content using OpenAI
+ * @param {string} text - The text to enhance
+ * @param {string} textType - The type of text (e.g., 'summary', 'job description')
+ * @param {string} context - Additional context for the enhancement
+ * @returns {Promise<string>} - Enhanced text
+ */
+async function enhanceText(text, textType = 'text', context = '') {
+    if (!text || text.trim() === '') return '';
+    
+    try {
+        const contextPrompt = context ? `Context: ${context}\n\n` : '';
+        
+        const prompt = `
+${contextPrompt}Please enhance the following ${textType} to make it more professional, impactful, and achievement-oriented. 
+Add specific metrics and quantifiable results where appropriate. Maintain the original meaning but make it more compelling:
+
+Original ${textType}:
+${text}
+
+Enhanced ${textType}:
+`;
+
+        const response = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+                {
+                    role: "system", 
+                    content: "You are an expert CV and resume writer who helps professionals make their experience sound more impactful. Focus on strong action verbs, quantifiable achievements, and professional language."
+                },
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 500
+        });
+
+        const enhancedText = response.choices[0].message.content.trim();
+        return enhancedText;
+    } catch (error) {
+        console.error('Error enhancing text with OpenAI:', error);
+        return text; // Return original text if enhancement fails
+    }
+}
+
+/**
+ * Suggest additional skills based on job descriptions
+ * @param {Array<string>} jobDescriptions - Array of job descriptions
+ * @param {Array<string>} existingSkills - Array of existing skills
+ * @returns {Promise<Array<string>>} - Array of suggested skills
+ */
+async function suggestSkills(jobDescriptions, existingSkills = []) {
+    try {
+        // Combine job descriptions
+        const combinedDescriptions = jobDescriptions.join('\n\n');
+        
+        const prompt = `
+Based on the following job descriptions, suggest 5-7 professional skills that would be relevant for this person's CV. 
+Don't include skills that are already listed in their existing skills.
+
+Job Descriptions:
+${combinedDescriptions}
+
+Existing Skills:
+${existingSkills.join(', ')}
+
+Suggested Additional Skills:
+`;
+
+        const response = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+                {
+                    role: "system", 
+                    content: "You are an expert in job skills and career development who helps professionals identify relevant skills for their industry."
+                },
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 200
+        });
+
+        const suggestedSkillsText = response.choices[0].message.content.trim();
+        
+        // Parse the skills from the response
+        // This handles various formats like numbered lists, bullet points, or comma-separated
+        const skillsList = suggestedSkillsText.split(/\n|,|\s*\d+\.\s*|\s*•\s*/)
+            .map(skill => skill.trim())
+            .filter(skill => skill && skill.length > 0 && !skill.includes(':'));
+            
+        return skillsList;
+    } catch (error) {
+        console.error('Error suggesting skills with OpenAI:', error);
+        return []; // Return empty array if skill suggestion fails
+    }
+}
+
+module.exports = {
+    enhanceWithOpenAI,
+    enhanceText,
+    suggestSkills
+};

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Enhancer - Improve Your Resume with AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>CV<span>Enhancer</span></h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#templates">Templates</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h2>Transform Your CV with AI-Powered Enhancement</h2>
+                    <p>Upload your existing resume, and our AI will help you create a professional, impactful CV that stands out from the competition and highlights your unique skills.</p>
+                    <div class="hero-buttons">
+                        <a href="#upload" class="btn btn-primary">Get Started <i class="fas fa-arrow-right"></i></a>
+                        <a href="#features" class="btn btn-secondary">Learn More</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1626271756864-1af6fc7e2e67?auto=format&q=80&w=600" alt="CV Enhancement" class="main-image">
+                    <div class="floating-element floating-element-1">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>AI Suggestions</span>
+                    </div>
+                    <div class="floating-element floating-element-2">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Professional Templates</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="upload" class="upload-section">
+            <div class="container">
+                <h2>Upload Your CV</h2>
+                <p>Drag and drop your CV (PDF format) or click to browse</p>
+                
+                <div class="upload-container" id="dropArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <div class="upload-text">
+                        <p>Drag & Drop your CV here</p>
+                        <p>or</p>
+                        <label for="fileInput" class="btn btn-secondary">Browse Files</label>
+                        <input type="file" id="fileInput" accept=".pdf" hidden>
+                    </div>
+                    <div class="file-info" id="fileInfo" style="display: none;">
+                        <div class="file-details">
+                            <span id="fileName"></span>
+                            <span id="fileSize"></span>
+                        </div>
+                        <div class="file-actions">
+                            <button id="removeFile" class="btn btn-text"><i class="fas fa-times"></i> Remove</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="progressText">0%</span>
+                    </div>
+                </div>
+                
+                <div class="upload-actions">
+                    <button id="uploadButton" class="btn btn-primary" disabled>Enhance My CV</button>
+                </div>
+                
+                <div class="upload-requirements">
+                    <p><i class="fas fa-info-circle"></i> Accepted format: PDF up to 5MB</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features-section">
+            <div class="container">
+                <h2>Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <h3>AI-Powered Enhancement</h3>
+                        <p>Our AI analyzes your content and suggests improvements to make your CV more impactful.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h3>Professional Templates</h3>
+                        <p>Choose from multiple professionally designed templates to make your CV stand out.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <h3>Easy Export</h3>
+                        <p>Download your enhanced CV as a PDF, ready to share with potential employers.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h3>Live Preview</h3>
+                        <p>See how your enhanced CV looks in different templates before making a final choice.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="templates" class="templates-section">
+            <div class="container">
+                <h2>Professional CV Templates</h2>
+                <p class="section-subtitle">Choose from our selection of professionally designed templates</p>
+                <div class="templates-grid">
+                    <div class="template-card">
+                        <div class="template-image">
+                            <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&q=80&w=500" alt="Professional Template">
+                            <div class="template-overlay">
+                                <a href="#" class="btn btn-primary btn-sm">Preview</a>
+                            </div>
+                        </div>
+                        <h3>Professional</h3>
+                        <p>A clean, straightforward design perfect for traditional industries.</p>
+                        <div class="template-tag">Popular</div>
+                    </div>
+                    <div class="template-card">
+                        <div class="template-image">
+                            <img src="https://images.unsplash.com/photo-1574359463620-ec57e6e8ac95?auto=format&q=80&w=500" alt="Modern Template">
+                            <div class="template-overlay">
+                                <a href="#" class="btn btn-primary btn-sm">Preview</a>
+                            </div>
+                        </div>
+                        <h3>Modern</h3>
+                        <p>A contemporary layout with bold accents for creative professionals.</p>
+                    </div>
+                    <div class="template-card">
+                        <div class="template-image">
+                            <img src="https://images.unsplash.com/photo-1608233893278-5cb48496a2ea?auto=format&q=80&w=500" alt="Executive Template">
+                            <div class="template-overlay">
+                                <a href="#" class="btn btn-primary btn-sm">Preview</a>
+                            </div>
+                        </div>
+                        <h3>Executive</h3>
+                        <p>An elegant, sophisticated design for senior positions.</p>
+                        <div class="template-tag">Premium</div>
+                    </div>
+                </div>
+                <div class="templates-cta">
+                    <p>Looking for more options? Explore our complete template library.</p>
+                    <a href="#" class="btn btn-secondary">View All Templates</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="process-section">
+            <div class="container">
+                <h2>How It Works</h2>
+                <div class="process-steps">
+                    <div class="process-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Upload Your CV</h3>
+                            <p>Upload your existing CV in PDF format.</p>
+                        </div>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>AI Analysis</h3>
+                            <p>Our system extracts and analyzes your CV content.</p>
+                        </div>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Content Enhancement</h3>
+                            <p>AI suggests improvements to your content while maintaining accuracy.</p>
+                        </div>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>Choose Template</h3>
+                            <p>Select from professional templates and preview your enhanced CV.</p>
+                        </div>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h3>Download & Share</h3>
+                            <p>Export your new CV as a PDF and start impressing employers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>CV<span>Enhancer</span></h2>
+                    <p>Transform your CV with the power of AI</p>
+                </div>
+                <div class="footer-links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#templates">Templates</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h3>Contact Us</h3>
+                    <p>Have questions? Reach out to us:</p>
+                    <a href="mailto:support@cvenhancer.com">Daoukkarim70@gmail.com</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 CVEnhancer. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        // Check if elements exist and attach event listeners
+        $(document).ready(function() {
+            console.log('Document ready');
+            
+            // Add event listener directly to upload button as a fallback
+            const uploadButton = document.getElementById('uploadButton');
+            if (uploadButton) {
+                console.log('Adding backup click handler to upload button');
+                uploadButton.addEventListener('click', function() {
+                    console.log('Upload button clicked via backup handler');
+                    if (window.CVEnhancer && window.CVEnhancer.state && window.CVEnhancer.state.currentFile) {
+                        const progressFill = document.getElementById('progressFill');
+                        const progressText = document.getElementById('progressText');
+                        const uploadProgress = document.getElementById('uploadProgress');
+                        
+                        if (uploadProgress) uploadProgress.style.display = 'block';
+                        
+                        // Simulate upload progress
+                        let progress = 0;
+                        const interval = setInterval(() => {
+                            progress += 5;
+                            if (progressFill) progressFill.style.width = progress + '%';
+                            if (progressText) progressText.textContent = progress + '%';
+                            
+                            if (progress >= 100) {
+                                clearInterval(interval);
+                                console.log('Upload complete, preparing to redirect...');
+                                
+                                // Try multiple methods to redirect
+                                try {
+                                    console.log('Redirecting via window.location.href...');
+                                    window.location.href = './editor.html';
+                                    
+                                    // If that doesn't immediately work, try the assign method
+                                    setTimeout(function() {
+                                        console.log('Trying window.location.assign...');
+                                        window.location.assign('./editor.html');
+                                        
+                                        // Last resort - try with full absolute path
+                                        setTimeout(function() {
+                                            console.log('Trying with absolute path...');
+                                            window.location = window.location.origin + '/editor.html';
+                                            
+                                            // Manual redirect if all else fails
+                                            setTimeout(function() {
+                                                console.log('Manual redirect with click...');
+                                                const a = document.createElement('a');
+                                                a.href = './editor.html';
+                                                a.innerText = 'Click here if not redirected automatically';
+                                                a.style.display = 'block';
+                                                a.style.margin = '20px auto';
+                                                a.style.textAlign = 'center';
+                                                document.body.appendChild(a);
+                                                a.click();
+                                            }, 500);
+                                        }, 500);
+                                    }, 500);
+                                } catch (e) {
+                                    console.error('Error redirecting:', e);
+                                }
+                            }
+                        }, 100);
+                    } else {
+                        console.log('Error: Please select a file first');
+                    }
+                });
+            }
+            
+            // Initialize the upload functionality
+            if ($('.upload-section').length > 0) {
+                console.log('Upload section found, initializing');
+                if (typeof initBasicUploadPage === 'function') {
+                    console.log('Initializing upload page');
+                    initBasicUploadPage();
+                } else {
+                    console.error('initBasicUploadPage function not defined');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

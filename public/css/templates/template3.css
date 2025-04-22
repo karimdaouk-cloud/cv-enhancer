@@ -1,0 +1,264 @@
+/* Executive Template */
+.cv-executive {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    color: #333;
+}
+
+/* Header */
+.cv-executive .cv-header {
+    text-align: center;
+    padding: 3rem 2.5rem 2rem;
+    position: relative;
+}
+
+.cv-executive .cv-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 1px;
+    background-color: #b78c33;
+}
+
+.cv-executive .name {
+    font-size: 2.5rem;
+    font-weight: normal;
+    color: #333;
+    margin: 0;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.cv-executive .profession {
+    font-size: 1.2rem;
+    color: #777;
+    margin: 0.5rem 0 1.5rem;
+    font-style: italic;
+    letter-spacing: 1px;
+}
+
+.cv-executive .contact-info {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.cv-executive .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.cv-executive .contact-item i {
+    color: #b78c33;
+}
+
+/* Content */
+.cv-executive .cv-content {
+    padding: 2.5rem;
+}
+
+.cv-executive .cv-section {
+    margin-bottom: 2.5rem;
+}
+
+.cv-executive .cv-section:last-child {
+    margin-bottom: 0;
+}
+
+.cv-executive .section-title {
+    font-size: 1.5rem;
+    font-weight: normal;
+    color: #333;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #eee;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+}
+
+.cv-executive .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 40px;
+    height: 1px;
+    background-color: #b78c33;
+}
+
+/* Summary */
+.cv-executive .summary {
+    line-height: 1.7;
+    color: #555;
+    font-size: 1.1rem;
+    text-align: justify;
+}
+
+/* Experience & Education */
+.cv-executive .timeline-item {
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.cv-executive .timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.cv-executive .timeline-header {
+    margin-bottom: 0.75rem;
+}
+
+.cv-executive .timeline-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0 0 0.25rem;
+}
+
+.cv-executive .timeline-subtitle {
+    font-size: 1.1rem;
+    color: #555;
+    margin: 0 0 0.5rem;
+    font-style: italic;
+}
+
+.cv-executive .timeline-period {
+    font-size: 0.9rem;
+    color: #b78c33;
+    letter-spacing: 1px;
+}
+
+.cv-executive .timeline-description {
+    color: #555;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.cv-executive .timeline-description ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 0.75rem;
+}
+
+.cv-executive .timeline-description ul li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.cv-executive .timeline-description ul li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: #b78c33;
+}
+
+/* Skills */
+.cv-executive .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.cv-executive .skills-column h3 {
+    font-size: 1.1rem;
+    font-weight: normal;
+    color: #777;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+    letter-spacing: 1px;
+}
+
+.cv-executive .skills-list {
+    line-height: 1.7;
+}
+
+.cv-executive .skill-item {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #555;
+}
+
+/* Certifications & Languages */
+.cv-executive .list-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.cv-executive .list-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.cv-executive .list-item-title {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.cv-executive .list-item-subtitle {
+    color: #777;
+    font-size: 1rem;
+    font-style: italic;
+}
+
+/* Additional info */
+.cv-executive .additional {
+    color: #555;
+    line-height: 1.7;
+    text-align: justify;
+    font-size: 1rem;
+}
+
+/* Page size adjustments */
+.cv-executive.a4 {
+    width: 21cm;
+    min-height: 29.7cm;
+}
+
+.cv-executive.letter {
+    width: 21.6cm;
+    min-height: 27.9cm;
+}
+
+/* Media Query for Print */
+@media print {
+    .cv-executive {
+        box-shadow: none;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .cv-executive .cv-header {
+        padding: 2rem 1.5rem 1.5rem;
+    }
+    
+    .cv-executive .name {
+        font-size: 2rem;
+    }
+    
+    .cv-executive .contact-info {
+        gap: 1rem;
+    }
+    
+    .cv-executive .skills-grid,
+    .cv-executive .list-items {
+        grid-template-columns: 1fr;
+    }
+}
